@@ -1,3 +1,5 @@
+use std::ops::Mul;
+
 #[derive(Debug)]
 pub struct GNumber {
     pub constituents: Vec<Constituent>,
@@ -7,6 +9,7 @@ pub struct GNumber {
 #[derive(Debug, Clone)]
 pub struct Constituent {
     pub base: u64,
+    pub coefficient: u64,
     pub exponent: ConstituentExp,
 }
 
@@ -45,9 +48,15 @@ impl GNumber {
                 cons.base = cons.base + 1;
                 cons.exponent = Self::helper2(cons.exponent.clone());
             });
+
+        Self::sum_over_power_factors(self);
     }
 
     fn helper1(number: u64, base: u64, step: u64, acc: &mut Vec<Constituent>) {
+        println!(
+            "number is {}, base is {}, step is {}, acc is {:?}",
+            &number, &base, &step, &acc
+        );
         if number == 0 {
             return;
         }
@@ -61,7 +70,12 @@ impl GNumber {
                 ConstituentExp::Constituent(Self::build_constituent(step, base))
             };
 
-            acc.push(Constituent { base, exponent });
+            // ZId nam dyal coeffcient
+            acc.push(Constituent {
+                coefficient: remainder,
+                base,
+                exponent,
+            });
         }
 
         Self::helper1(number / base, base, step + 1, acc);
@@ -81,17 +95,20 @@ impl GNumber {
     }
 
     pub fn sum_over_power_factors(&mut self) {
-        let result = self.constituents.iter().fold(0u64, |acc, cons| {
+        self.sum_value = self.constituents.iter().fold(0u64, |acc, cons| {
             acc + cons
                 .base
                 .pow(Self::helper3(cons.exponent.clone()).try_into().unwrap())
+                .mul(cons.coefficient)
         });
-
-        self.sum_value = result;
     }
 
     pub fn substract_one_and_restart(&mut self) {
-        self.constituents = Self::build_constituent(self.sum_value - 1, self.constituents[0].base);
+        assert!(self.constituents.len() != 0);
+        println!("constituent are {:?}", &self.constituents);
+        self.sum_value = self.sum_value - 1;
+        println!("self sum value is {:?}", &self.sum_value);
+        self.constituents = Self::build_constituent(self.sum_value, self.constituents[0].base + 1);
     }
 
     fn build_constituent(number: u64, base: u64) -> Vec<Constituent> {

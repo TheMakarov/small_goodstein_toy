@@ -13,10 +13,16 @@ fn main() {
             break;
         }
 
+        println!("Step 1 before anything ");
         dbg!(&a_number);
         a_number.do_goodstein();
-        println!("the sum of the goodstein is {}", &a_number.sum_value);
-        a_number.sum_over_power_factors();
+        println!("Step 2 after goodstein ");
+        dbg!(&a_number);
         a_number.substract_one_and_restart();
+        println!("Step 3 after substract one and restart ");
+        dbg!(&a_number);
+        a_number.sum_over_power_factors();
+        println!("Step 4 final ");
+        dbg!(&a_number);
     }
 }
